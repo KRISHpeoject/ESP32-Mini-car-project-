@@ -1,83 +1,38 @@
-// ESP32-Mini-car-project-
-//CODE
+ESP32 Bluetooth Controlled Car
+
+This project showcases a simple and efficient four-wheel car built using the ESP32 microcontroller, the TB6612FNG motor driver, and two small DC N20 gear motors. The car is fully controlled via Bluetooth using a smartphone.
+
+🔧 Hardware Overview
+
+Microcontroller: ESP32 (with Bluetooth capability)
+
+Motor Driver: TB6612FNG Dual H-Bridge
+
+Motors: 2 × N20 DC gear motors
+
+Front Wheel: using dummy Motor gear box and wheel
+
+Power Supply: 3.7 volt battery 
+
+Motor Driver VM: 3.7-5.0V one Li-ion battery
 
 
-#include "BluetoothSerial.h"
+Bluetooth Communication: Uses BluetoothSerial library
 
-BluetoothSerial SerialBT;
+Control Method: Smartphone app or Bluetooth terminal (commands: F, B, L, R, S, 1–4)
 
-// TB6612FNG Pins
-#define AIN1 27
-#define AIN2 26
-#define PWMA 14
-#define BIN1 33
-#define BIN2 32
-#define PWMB 25
-#define STBY 4
 
-int speedVal = 200; // Speed 0–255
+📦 Features
 
-void setup() {
-  Serial.begin(9600);
-  SerialBT.begin("ESP32_Car");  // Bluetooth device name
+Forward / Backward Movement: Both motors run at the same speed
 
-  pinMode(AIN1, OUTPUT); pinMode(AIN2, OUTPUT); pinMode(PWMA, OUTPUT);
-  pinMode(BIN1, OUTPUT); pinMode(BIN2, OUTPUT); pinMode(PWMB, OUTPUT);
-  pinMode(STBY, OUTPUT);
-  digitalWrite(STBY, HIGH);  // Enable motors
-}
+Turning Left / Right: One motor is stopped while the other runs
 
-void loop() {
-  if (SerialBT.available()) {
-    char cmd = SerialBT.read();
-    handleCommand(cmd);
-  }
-}
+Stop Command: Both motors stop instantly
 
-void handleCommand(char cmd) {
-  switch (cmd) {
-    case 'F': forward(); break;
-    case 'B': backward(); break;
-    case 'L': turnLeft(); break;
-    case 'R': turnRight(); break;
-    case 'S': stopMotors(); break;
-    case '1': speedVal = 100; break;
-    case '2': speedVal = 150; break;
-    case '3': speedVal = 200; break;
-    case '4': speedVal = 255; break;
-  }
-}
+Speed Control: 4 levels (100, 150, 200, 255 PWM)
 
-// Movement functions
-void forward() {
-  digitalWrite(AIN1, HIGH); digitalWrite(AIN2, LOW);
-  digitalWrite(BIN1, HIGH); digitalWrite(BIN2, LOW);
-  analogWrite(PWMA, speedVal);
-  analogWrite(PWMB, speedVal);
-}
 
-void backward() {
-  digitalWrite(AIN1, LOW); digitalWrite(AIN2, HIGH);
-  digitalWrite(BIN1, LOW); digitalWrite(BIN2, HIGH);
-  analogWrite(PWMA, speedVal);
-  analogWrite(PWMB, speedVal);
-}
+🧠 How It Works
 
-void turnLeft() {
-  digitalWrite(AIN1, LOW); digitalWrite(AIN2, LOW);  // Left motor stop
-  digitalWrite(BIN1, HIGH); digitalWrite(BIN2, LOW); // Right motor forward
-  analogWrite(PWMA, 0);
-  analogWrite(PWMB, speedVal);
-}
-
-void turnRight() {
-  digitalWrite(AIN1, HIGH); digitalWrite(AIN2, LOW); // Left motor forward
-  digitalWrite(BIN1, LOW); digitalWrite(BIN2, LOW);  // Right motor stop
-  analogWrite(PWMA, speedVal);
-  analogWrite(PWMB, 0);
-}
-
-void stopMotors() {
-  analogWrite(PWMA, 0);
-  analogWrite(PWMB, 0);
-}
+Commands are sent via Bluetooth from the smartphone. The ESP32 receives characters and maps them to motor actions using the TB6612FNG driver.
